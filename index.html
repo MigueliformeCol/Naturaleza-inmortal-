@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Naturaleza Inmortal — Arte Científico en Resina</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Josefin+Sans:wght@200;300;400&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --black:#080808;--dark:#0f0f0f;--card:#141414;
+      --gold:#c9a84c;--gold-light:#e8d5a3;--gold-dim:#7a6330;
+      --white:#f0ece4;--muted:#7a7570;--border:rgba(201,168,76,.18);
+      --green:#4caf7a;--red:#884444;
+    }
+    html{scroll-behavior:smooth}
+    body{background:var(--black);color:var(--white);font-family:'Josefin Sans',sans-serif;font-weight:300;letter-spacing:.04em;overflow-x:hidden;cursor:none}
+    body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.025;pointer-events:none;z-index:9998}
+    #cursor{width:10px;height:10px;border-radius:50%;background:var(--gold);position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s,opacity .2s;mix-blend-mode:difference}
+    #cursor.x{width:40px;height:40px;opacity:.5}
+
+    /* HERO */
+    header{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;position:relative;padding:4rem 2rem;border-bottom:1px solid var(--border)}
+    .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 60%,rgba(201,168,76,.07) 0%,transparent 70%),radial-gradient(ellipse 30% 30% at 80% 20%,rgba(201,168,76,.04) 0%,transparent 60%);pointer-events:none}
+    .logo-line{font-size:clamp(.55rem,1.2vw,.75rem);letter-spacing:.35em;color:var(--gold);text-transform:uppercase;margin-bottom:2rem;opacity:0;animation:fadeUp .8s .2s forwards}
+    h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(3rem,8vw,7rem);line-height:1;color:var(--white);opacity:0;animation:fadeUp .9s .4s forwards}
+    h1 em{font-style:italic;color:var(--gold-light)}
+    .hero-sub{margin-top:2rem;font-size:clamp(.7rem,1.5vw,.85rem);letter-spacing:.2em;color:var(--muted);text-transform:uppercase;max-width:520px;line-height:2;opacity:0;animation:fadeUp .8s .7s forwards}
+    .hero-div{width:60px;height:1px;background:linear-gradient(to right,transparent,var(--gold),transparent);margin:2.5rem auto;opacity:0;animation:fadeUp .8s .6s forwards}
+    .scroll-hint{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;font-size:.6rem;letter-spacing:.3em;color:var(--gold-dim);text-transform:uppercase;animation:pulse 2.5s infinite}
+    .scroll-hint::after{content:'';width:1px;height:40px;background:linear-gradient(to bottom,var(--gold-dim),transparent)}
+
+    /* NAV */
+    nav{position:sticky;top:0;z-index:100;background:rgba(8,8,8,.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;padding:1rem 3rem}
+    .nav-brand{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--gold-light)}
+    .nav-links{display:flex;gap:2.5rem;list-style:none}
+    .nav-links a{color:var(--muted);text-decoration:none;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;transition:color .3s;cursor:none}
+    .nav-links a:hover{color:var(--gold)}
+
+    /* FILTERS */
+    .filter-bar{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center;padding:3rem 2rem 1.5rem}
+    .filter-btn{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'Josefin Sans',sans-serif;font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;padding:.5rem 1.4rem;cursor:none;transition:all .3s}
+    .filter-btn:hover,.filter-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.06)}
+    .section-label{text-align:center;padding:.5rem 2rem 3rem}
+    .section-label p{font-size:.65rem;letter-spacing:.3em;color:var(--gold-dim);text-transform:uppercase}
+
+    /* GALLERY */
+    .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1px;background:var(--border);max-width:1600px;margin:0 auto;padding:0 1px 1px}
+    .card{background:var(--card);position:relative;overflow:hidden;cursor:none;transition:transform .5s cubic-bezier(.25,.8,.25,1)}
+    .card:hover{transform:scale(1.012);z-index:2}
+    .card-img{aspect-ratio:4/3;overflow:hidden;position:relative}
+    .card[data-fmt*="Llavero"] .card-img{aspect-ratio:3/2}
+    .card[data-fmt*="Vertical"] .card-img,.card[data-fmt*="Rect. Vertical"] .card-img{aspect-ratio:2/3}
+    .card-img img{width:100%;height:100%;object-fit:cover;transition:transform .8s cubic-bezier(.25,.8,.25,1),filter .5s;filter:brightness(.93) saturate(1.1)}
+    .card:hover .card-img img{transform:scale(1.07);filter:brightness(1.06) saturate(1.2)}
+    .card-img::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,.12) 0%,transparent 60%);opacity:0;transition:opacity .5s;pointer-events:none}
+    .card:hover .card-img::after{opacity:1}
+    .card.sold .card-img img{filter:brightness(.45) saturate(.3)}
+    .card.sold .card-img::before{content:'VENDIDA';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;letter-spacing:.4em;color:rgba(255,255,255,.45);z-index:2}
+    .card-body{padding:1.2rem 1.4rem 1.4rem;border-top:1px solid var(--border)}
+    .card-fmt{font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:.4rem}
+    .card-name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--white);line-height:1.3;margin-bottom:.2rem}
+    .card-sci{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.82rem;color:var(--muted);margin-bottom:.8rem;line-height:1.4}
+    .card-meta{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:.4rem}
+    .card-dims{font-size:.6rem;letter-spacing:.12em;color:var(--muted)}
+    .card-price{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--gold-light)}
+    .card-region{font-size:.58rem;letter-spacing:.1em;color:var(--gold-dim);margin-top:.3rem;width:100%}
+    .badge{display:inline-block;font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;padding:.2rem .6rem;margin-top:.7rem;border:1px solid}
+    .badge.av{border-color:var(--green);color:var(--green)}
+    .badge.sold{border-color:var(--red);color:var(--red)}
+
+    /* LIGHTBOX */
+    #lb{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.96);align-items:center;justify-content:center;flex-direction:column;padding:2rem;cursor:none}
+    #lb.open{display:flex;animation:fadeIn .3s}
+    #lb-img{max-width:80vw;max-height:68vh;object-fit:contain;border:1px solid var(--border);box-shadow:0 0 80px rgba(201,168,76,.1)}
+    #lb-info{margin-top:1.5rem;text-align:center}
+    #lb-name{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--white)}
+    #lb-sci{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--muted);font-size:.95rem;margin-top:.2rem}
+    #lb-det{margin-top:.6rem;font-size:.63rem;letter-spacing:.2em;color:var(--gold-dim);text-transform:uppercase}
+    #lb-close{position:fixed;top:1.5rem;right:2rem;background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:none;transition:color .3s}
+    #lb-close:hover{color:var(--gold)}
+
+    /* ABOUT */
+    .about{max-width:900px;margin:0 auto;padding:8rem 3rem;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;border-top:1px solid var(--border)}
+    .about h2{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,2.8rem);font-weight:300;line-height:1.2;margin-bottom:1.5rem}
+    .about h2 em{color:var(--gold-light);font-style:italic}
+    .about p{font-size:.8rem;line-height:2.2;color:var(--muted);margin-bottom:1rem}
+    .stats{display:grid;grid-template-columns:1fr 1fr;gap:2rem}
+    .stat{border-left:1px solid var(--border);padding-left:1.25rem}
+    .stat-n{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:300;color:var(--gold-light);line-height:1}
+    .stat-l{font-size:.6rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-top:.4rem}
+
+    /* CONTACT */
+    .contact{border-top:1px solid var(--border);padding:7rem 3rem;text-align:center}
+    .contact h2{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:300;margin-bottom:1rem}
+    .contact h2 em{color:var(--gold-light);font-style:italic}
+    .contact p{color:var(--muted);font-size:.78rem;letter-spacing:.1em;margin-bottom:3rem;line-height:2}
+    .btns{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-bottom:4rem}
+    .btn{display:inline-flex;align-items:center;gap:.6rem;text-decoration:none;font-family:'Josefin Sans',sans-serif;font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;padding:.85rem 2rem;border:1px solid var(--border);color:var(--white);transition:all .35s;cursor:none}
+    .btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.06)}
+    .btn-p{background:var(--gold);border-color:var(--gold);color:var(--black)}
+    .btn-p:hover{background:var(--gold-light);border-color:var(--gold-light);color:var(--black)}
+    .form-wrap{max-width:540px;margin:0 auto;display:grid;gap:1rem;text-align:left}
+    .form-wrap input,.form-wrap textarea,.form-wrap select{width:100%;background:var(--card);border:1px solid var(--border);color:var(--white);font-family:'Josefin Sans',sans-serif;font-size:.75rem;letter-spacing:.1em;padding:.9rem 1.1rem;outline:none;transition:border-color .3s;cursor:none}
+    .form-wrap input:focus,.form-wrap textarea:focus,.form-wrap select:focus{border-color:var(--gold)}
+    .form-wrap textarea{resize:vertical;min-height:120px}
+    .form-wrap select option{background:var(--dark)}
+    .form-wrap label{font-size:.6rem;letter-spacing:.2em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:.3rem;display:block}
+    footer{border-top:1px solid var(--border);padding:2.5rem 3rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+    footer p{font-size:.6rem;letter-spacing:.15em;color:var(--muted)}
+    footer a{color:var(--gold-dim);text-decoration:none;transition:color .3s}
+    footer a:hover{color:var(--gold)}
+    .reveal{opacity:0;transform:translateY(30px);transition:opacity .8s,transform .8s}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+    @media(max-width:768px){nav{padding:1rem 1.5rem}.nav-links{display:none}.about{grid-template-columns:1fr;gap:3rem;padding:5rem 1.5rem}.gallery{grid-template-columns:1fr 1fr}}
+    @media(max-width:480px){.gallery{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div id="cursor"></div>
+
+<header>
+  <div class="hero-bg"></div>
+  <p class="logo-line">Arte Científico · Resina Epóxica · Orinoquía Colombiana · 2026</p>
+  <h1>Naturaleza<br><em>Inmortal</em></h1>
+  <div class="hero-div"></div>
+  <p class="hero-sub">Especímenes naturales preservados para siempre en resina cristalina — piezas únicas de calidad museo</p>
+  <div class="scroll-hint">Explorar</div>
+</header>
+
+<nav>
+  <span class="nav-brand">Naturaleza Inmortal</span>
+  <ul class="nav-links">
+    <li><a href="#galeria">Galería</a></li>
+    <li><a href="#sobre">Sobre el Proyecto</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+</nav>
+
+<div id="galeria">
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="all">Todas</button>
+    <button class="filter-btn" data-filter="bloque">Bloques</button>
+    <button class="filter-btn" data-filter="circular">Circulares</button>
+    <button class="filter-btn" data-filter="pisapapel">Pisapapeles</button>
+    <button class="filter-btn" data-filter="llavero">Llaveros</button>
+    <button class="filter-btn" data-filter="disponible">Disponibles</button>
+  </div>
+  <div class="section-label"><p>Colección completa · <span id="count">39</span> piezas</p></div>
+</div>
+
+<div class="gallery" id="gallery">
+
+  <!-- 1 -->
+  <div class="card reveal" data-fmt="Bloque rectangular" data-status="disponible">
+    <div class="card-img"><img src="S. irritans x1.jpg" alt="Piraña llanera manchada" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Bloque Rectangular · Individuo</p>
+      <p class="card-name">Piraña Llanera Manchada</p>
+      <p class="card-sci">Serrasalmus irritans</p>
+      <div class="card-meta">
+        <span class="card-dims">17 × 10 cm</span>
+        <span class="card-price">$ 200.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="card reveal" data-fmt="Bloque circular" data-status="disponible">
+    <div class="card-img"><img src="comunidad quenane x5.jpg" alt="Comunidad circular Quenane" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Bloque Circular · Comunidad</p>
+      <p class="card-name">Comunidad Circular Quenane</p>
+      <p class="card-sci">Hemigrammus barrigonae · Bryconops giacopinni · Hyphessobrycon acaciae · Gymnocorymbus thayeri · Astyanax bimaculatus</p>
+      <div class="card-meta">
+        <span class="card-dims">15 × 1,5 cm</span>
+        <span class="card-price">$ 140.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="card reveal" data-fmt="Bloque circular" data-status="disponible">
+    <div class="card-img"><img src="comunidad laguna x7.jpg" alt="Comunidad circular laguna" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Bloque Circular · Comunidad</p>
+      <p class="card-name">Comunidad Circular Laguna</p>
+      <p class="card-sci">Serrasalmus irritans · Hemigrammus barrigonae · Bryconops giacopinni · Gymnocorymbus thayeri · Astyanax bimaculatus · Aphyocharax alburnus</p>
+      <div class="card-meta">
+        <span class="card-dims">15 × 1,5 cm</span>
+        <span class="card-price">$ 160.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="card reveal" data-fmt="Bloque circular" data-status="disponible">
+    <div class="card-img"><img src="comunidad morichal x10.jpg" alt="Comunidad circular morichal" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Bloque Circular · Comunidad</p>
+      <p class="card-name">Comunidad Circular Morichal</p>
+      <p class="card-sci">Characidium zebra · Aequidens metae · Apistogramma macmasteri · Copella metae · Poptella compressa · Hemigrammus barrigonae · Bryconops giacopinni · Hyphessobrycon acaciae · Gymnocorymbus thayeri · Astyanax bimaculatus</p>
+      <div class="card-meta">
+        <span class="card-dims">15 × 1,5 cm</span>
+        <span class="card-price">$ 170.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="card reveal" data-fmt="Bloque circular" data-status="disponible">
+    <div class="card-img"><img src="siluros x4.jpg" alt="Peces gato circular" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Bloque Circular · Comunidad</p>
+      <p class="card-name">Peces Gato Circular</p>
+      <p class="card-sci">Corydoras metae · Pimelodella metae · Ancistrus triradiatus</p>
+      <div class="card-meta">
+        <span class="card-dims">15 × 1,5 cm</span>
+        <span class="card-price">$ 150.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="card reveal" data-fmt="Bloque rectangular" data-status="disponible">
+    <div class="card-img"><img src="A. mexicanum x1.jpg" alt="Ajolote marrón" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Bloque Rectangular · Individuo</p>
+      <p class="card-name">Ajolote Marrón</p>
+      <p class="card-sci">Ambystoma mexicanum</p>
+      <div class="card-meta">
+        <span class="card-dims">14,5 × 6,5 cm</span>
+        <span class="card-price">$ 200.000</span>
+      </div>
+      <p class="card-region">📍 Cautiverio</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 8 -->
+  <div class="card reveal" data-fmt="Placa rectangular" data-status="disponible">
+    <div class="card-img"><img src="t.alva.jpg" alt="Pluma lechuza común" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Placa Rectangular · Aire</p>
+      <p class="card-name">Pluma Lechuza Común</p>
+      <p class="card-sci">Tyto alba</p>
+      <div class="card-meta">
+        <span class="card-dims">11,5 × 3,7 cm</span>
+        <span class="card-price">$ 40.000</span>
+      </div>
+      <p class="card-region">📍 Encontrado en campo</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 9 -->
+  <div class="card reveal" data-fmt="Pisapapel rectangular" data-status="disponible">
+    <div class="card-img"><img src="multiespecie bosque de galeria.jpg" alt="Comunidad bosque de galeria" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Pisapapel Rectangular · Comunidad</p>
+      <p class="card-name">Comunidad Bosque de Galería</p>
+      <p class="card-sci">Pyrrhulina lugubris · Copella metae · Aphyocharax alburnus · Hemigrammus marginatus · Hyphessobrycon sweglesi · Thoracocharax stellatus</p>
+      <div class="card-meta">
+        <span class="card-dims">11,5 × 3,7 cm</span>
+        <span class="card-price">$ 70.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 10 -->
+  <div class="card reveal" data-fmt="Pisapapel rectangular" data-status="disponible">
+    <div class="card-img"><img src="multiespecie morichal.jpg" alt="Comunidad morichal" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Pisapapel Rectangular · Comunidad</p>
+      <p class="card-name">Comunidad Morichal I</p>
+      <p class="card-sci">Characidium zebra · Characidium pteropides · Aequidens metae · Apistogramma macmasteri · Ochmacanthus alternus</p>
+      <div class="card-meta">
+        <span class="card-dims">11,5 × 3,7 cm</span>
+        <span class="card-price">$ 70.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 11 VENDIDA -->
+  <div class="card sold reveal" data-fmt="Pisapapel rectangular" data-status="vendida">
+    <div class="card-img"><img src="multiespecie morichal 2.jpg" alt="Comunidad morichal 2" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Pisapapel Rectangular · Comunidad</p>
+      <p class="card-name">Comunidad Morichal II</p>
+      <p class="card-sci">Copella metae · Hemigrammus barrigonae · Hyphessobrycon acaciae</p>
+      <div class="card-meta">
+        <span class="card-dims">11,5 × 3,7 cm</span>
+        <span class="card-price">$ 70.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge sold">Vendida</span>
+    </div>
+  </div>
+
+  <!-- 12 -->
+  <div class="card reveal" data-fmt="Pisapapel rectangular" data-status="disponible">
+    <div class="card-img"><img src="multiespecie sabana inundada.jpg" alt="Comunidad sabana inundada" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Pisapapel Rectangular · Comunidad</p>
+      <p class="card-name">Comunidad Sabana Inundada</p>
+      <p class="card-sci">Odontostilbe pulchra · Hemigrammus barrigonae · Bryconops giacopinni · Hemiodus microlepis</p>
+      <div class="card-meta">
+        <span class="card-dims">11,5 × 3,7 cm</span>
+        <span class="card-price">$ 70.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 13 -->
+  <div class="card reveal" data-fmt="Pisapapel cuadrado" data-status="disponible">
+    <div class="card-img"><img src="Aequidens cx5.jpg" alt="Alevinos" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Pisapapel Cuadrado · Camada</p>
+      <p class="card-name">Alevinos</p>
+      <p class="card-sci">Aequidens metae</p>
+      <div class="card-meta">
+        <span class="card-dims">4 × 4 cm</span>
+        <span class="card-price">$ 30.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 14 -->
+  <div class="card reveal" data-fmt="Pisapapel cuadrado" data-status="disponible">
+    <div class="card-img"><img src="avispon europeo x1.jpg" alt="Avispón Europeo" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Pisapapel Cuadrado · Individuo</p>
+      <p class="card-name">Avispón Europeo</p>
+      <p class="card-sci">Vespa velutina</p>
+      <div class="card-meta">
+        <span class="card-dims">4 × 4 cm</span>
+        <span class="card-price">$ 30.000</span>
+      </div>
+      <p class="card-region">📍 España</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 15 -->
+  <div class="card reveal" data-fmt="Pisapapel cuadrado" data-status="disponible">
+    <div class="card-img"><img src="avispon obrera zangano x3.jpg" alt="Avispón vs abeja" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Pisapapel Cuadrado · Depredador y presa</p>
+      <p class="card-name">Avispón vs Abeja Común</p>
+      <p class="card-sci">Vespa velutina · Apis mellifera</p>
+      <div class="card-meta">
+        <span class="card-dims">4 × 4 cm</span>
+        <span class="card-price">$ 30.000</span>
+      </div>
+      <p class="card-region">📍 España</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 16 -->
+  <div class="card reveal" data-fmt="Pisapapel cuadrado" data-status="disponible">
+    <div class="card-img"><img src="avispa x1.jpg" alt="Avispa embarradora" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Pisapapel Cuadrado · Individuo</p>
+      <p class="card-name">Avispa Embarradora</p>
+      <p class="card-sci">Pompilocalus sp.</p>
+      <div class="card-meta">
+        <span class="card-dims">4 × 4 cm</span>
+        <span class="card-price">$ 20.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 17 -->
+  <div class="card reveal" data-fmt="Pisapapel cuadrado" data-status="disponible">
+    <div class="card-img"><img src="escarabajo x1.jpg" alt="Escarabajo longicornio" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Pisapapel Cuadrado · Individuo</p>
+      <p class="card-name">Escarabajo Longicornio</p>
+      <p class="card-sci">Dendrobias sp.</p>
+      <div class="card-meta">
+        <span class="card-dims">4 × 4 cm</span>
+        <span class="card-price">$ 20.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 18 -->
+  <div class="card reveal" data-fmt="Llavero ovalado" data-status="disponible">
+    <div class="card-img"><img src="A. mac px1.jpg" alt="Llavero cíclido enano" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Ovalado · Individuo</p>
+      <p class="card-name">Cíclido Enano</p>
+      <p class="card-sci">Apistogramma macmasteri</p>
+      <div class="card-meta">
+        <span class="card-dims">5 × 3 cm</span>
+        <span class="card-price">$ 30.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 19 -->
+  <div class="card reveal" data-fmt="Llavero placa" data-status="disponible">
+    <div class="card-img"><img src="Ala mariposa ex2.jpg" alt="Llavero alas de mariposa" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Placa · Fragmento</p>
+      <p class="card-name">Alas de Mariposa I</p>
+      <p class="card-sci">Sp.</p>
+      <div class="card-meta">
+        <span class="card-dims">4,2 × 3 cm</span>
+        <span class="card-price">$ 20.000</span>
+      </div>
+      <p class="card-region">📍 Región Andina Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 20 -->
+  <div class="card reveal" data-fmt="Llavero circular" data-status="disponible">
+    <div class="card-img"><img src="Alas mariposa rx4.jpg" alt="Llavero alas de mariposa circular" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Circular · Fragmento</p>
+      <p class="card-name">Alas de Mariposa II</p>
+      <p class="card-sci">Sp.</p>
+      <div class="card-meta">
+        <span class="card-dims">3,8 cm diám.</span>
+        <span class="card-price">$ 20.000</span>
+      </div>
+      <p class="card-region">📍 Región Andina Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 21 -->
+  <div class="card reveal" data-fmt="Llavero rectangular" data-status="disponible">
+    <div class="card-img"><img src="C.mento.jpg" alt="Llavero piraña" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Rectangular · Individuo</p>
+      <p class="card-name">Llavero Piraña</p>
+      <p class="card-sci">Catoprion mento</p>
+      <div class="card-meta">
+        <span class="card-dims">6,3 × 3,3 cm</span>
+        <span class="card-price">$ 30.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 22 -->
+  <div class="card reveal" data-fmt="Llavero ovalado" data-status="disponible">
+    <div class="card-img"><img src="Cicl pareja px2.jpg" alt="Llavero 2 sp cíclidos" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Ovalado · Misma familia</p>
+      <p class="card-name">Pareja de Cíclidos</p>
+      <p class="card-sci">Apistogramma macmasteri · Aequidens metae</p>
+      <div class="card-meta">
+        <span class="card-dims">5 × 3 cm</span>
+        <span class="card-price">$ 20.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 23 -->
+  <div class="card reveal" data-fmt="Llavero rectangular" data-status="disponible">
+    <div class="card-img"><img src="Cuarteto sp rx5.jpg" alt="Llavero 3 sp carácidos" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Rectangular · Mismo orden</p>
+      <p class="card-name">Trío de Carácidos I</p>
+      <p class="card-sci">Pyrrhulina lugubris · Hyphessobrycon acaciae · Hemigrammus barrigonae</p>
+      <div class="card-meta">
+        <span class="card-dims">6,3 × 3,3 cm</span>
+        <span class="card-price">$ 30.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 24 -->
+  <div class="card reveal" data-fmt="Llavero ovalado" data-status="disponible">
+    <div class="card-img"><img src="Escorpion px1.jpg" alt="Llavero escorpión sabanero" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Ovalado · Individuo</p>
+      <p class="card-name">Escorpión Sabanero</p>
+      <p class="card-sci">Tityus columbianus</p>
+      <div class="card-meta">
+        <span class="card-dims">5 × 3 cm</span>
+        <span class="card-price">$ 30.000</span>
+      </div>
+      <p class="card-region">📍 Región Andina Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 25 -->
+  <div class="card reveal" data-fmt="Llavero rectangular" data-status="disponible">
+    <div class="card-img"><img src="H. acaciae rx4.jpg" alt="Llavero H. acaciae arena" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Rectangular · Individuo</p>
+      <p class="card-name">H. acaciae con Arena</p>
+      <p class="card-sci">Hyphessobrycon acaciae</p>
+      <div class="card-meta">
+        <span class="card-dims">6,3 × 3,3 cm</span>
+        <span class="card-price">$ 30.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 26 -->
+  <div class="card reveal" data-fmt="Llavero circular" data-status="disponible">
+    <div class="card-img"><img src="H. bar arena p rx1.jpg" alt="Llavero H. barrigonae arena" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Circular · Individuo</p>
+      <p class="card-name">H. barrigonae Arena I</p>
+      <p class="card-sci">Hemigrammus barrigonae</p>
+      <div class="card-meta">
+        <span class="card-dims">3,8 cm diám.</span>
+        <span class="card-price">$ 30.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 27 -->
+  <div class="card reveal" data-fmt="Llavero circular" data-status="disponible">
+    <div class="card-img"><img src="H. bar arena rx1.jpg" alt="Llavero H. barrigonae arena 2" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Circular · Individuo</p>
+      <p class="card-name">H. barrigonae Arena II</p>
+      <p class="card-sci">Hemigrammus barrigonae</p>
+      <div class="card-meta">
+        <span class="card-dims">3,8 cm diám.</span>
+        <span class="card-price">$ 30.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 28 -->
+  <div class="card reveal" data-fmt="Llavero placa" data-status="disponible">
+    <div class="card-img"><img src="H. met arena ex2.jpg" alt="Llavero par H. acaciae arena" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Placa · Misma familia</p>
+      <p class="card-name">Par H. acaciae con Arena</p>
+      <p class="card-sci">Hyphessobrycon acaciae</p>
+      <div class="card-meta">
+        <span class="card-dims">4,2 × 3 cm</span>
+        <span class="card-price">$ 30.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 29 -->
+  <div class="card reveal" data-fmt="Llavero ovalado" data-status="disponible">
+    <div class="card-img"><img src="H.bar arena px1.jpg" alt="Llavero H. barrigonae arena oval" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Ovalado · Individuo</p>
+      <p class="card-name">H. barrigonae Arena III</p>
+      <p class="card-sci">Hemigrammus barrigonae</p>
+      <div class="card-meta">
+        <span class="card-dims">5 × 3 cm</span>
+        <span class="card-price">$ 30.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 30 -->
+  <div class="card reveal" data-fmt="Llavero corazon" data-status="disponible">
+    <div class="card-img"><img src="H.sue gx1.jpg" alt="Llavero H. sweglesi" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Corazón · Individuo</p>
+      <p class="card-name">H. sweglesi</p>
+      <p class="card-sci">Hyphessobrycon sweglesi</p>
+      <div class="card-meta">
+        <span class="card-dims">3,8 × 3,5 cm</span>
+        <span class="card-price">$ 20.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 31 -->
+  <div class="card reveal" data-fmt="Llavero cuadrado" data-status="disponible">
+    <div class="card-img"><img src="Mariposa completa cafe cx1.jpg" alt="Llavero mariposa completa" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Cuadrado · Individuo</p>
+      <p class="card-name">Mariposa Completa</p>
+      <p class="card-sci">Sp.</p>
+      <div class="card-meta">
+        <span class="card-dims">4 × 4 cm</span>
+        <span class="card-price">$ 20.000</span>
+      </div>
+      <p class="card-region">📍 Región Andina Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 32 -->
+  <div class="card reveal" data-fmt="Llavero rectangular" data-status="disponible">
+    <div class="card-img"><img src="Pareja sp rx3.jpg" alt="Llavero 2 sp carácidos" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Rectangular · Misma familia</p>
+      <p class="card-name">Pareja de Carácidos</p>
+      <p class="card-sci">Hyphessobrycon acaciae · Hemigrammus barrigonae</p>
+      <div class="card-meta">
+        <span class="card-dims">6,3 × 3,3 cm</span>
+        <span class="card-price">$ 20.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 33 VENDIDA -->
+  <div class="card sold reveal" data-fmt="Llavero cuadrado" data-status="vendida">
+    <div class="card-img"><img src="petalos amarillos.jpg" alt="Llavero pétalos de flores" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Cuadrado · Fragmento</p>
+      <p class="card-name">Pétalos de Flores</p>
+      <p class="card-sci">Sp.</p>
+      <div class="card-meta">
+        <span class="card-dims">4 × 4 cm</span>
+        <span class="card-price">$ 20.000</span>
+      </div>
+      <p class="card-region">📍 Región Andina Colombiana</p>
+      <span class="badge sold">Vendida</span>
+    </div>
+  </div>
+
+  <!-- 34 -->
+  <div class="card reveal" data-fmt="Llavero circular" data-status="disponible">
+    <div class="card-img"><img src="O. pul c cx1.jpg" alt="Llavero O. pulchra circular" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Circular · Individuo</p>
+      <p class="card-name">O. pulchra Circular</p>
+      <p class="card-sci">Odontostilbe pulchra</p>
+      <div class="card-meta">
+        <span class="card-dims">3,8 cm diám.</span>
+        <span class="card-price">$ 20.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 35 -->
+  <div class="card reveal" data-fmt="Llavero circular" data-status="disponible">
+    <div class="card-img"><img src="T.est rx1.jpg" alt="Llavero T. stellatus" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Circular · Individuo</p>
+      <p class="card-name">T. stellatus</p>
+      <p class="card-sci">Thoracocharax stellatus</p>
+      <div class="card-meta">
+        <span class="card-dims">3,8 cm diám.</span>
+        <span class="card-price">$ 20.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 36 -->
+  <div class="card reveal" data-fmt="Llavero cuadrado" data-status="disponible">
+    <div class="card-img"><img src="O. pul p cx1.jpg" alt="Llavero O. pulchra cuadrado" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Cuadrado · Individuo</p>
+      <p class="card-name">O. pulchra Cuadrado</p>
+      <p class="card-sci">Odontostilbe pulchra</p>
+      <div class="card-meta">
+        <span class="card-dims">4 × 4 cm</span>
+        <span class="card-price">$ 20.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 37 -->
+  <div class="card reveal" data-fmt="Llavero cuadrado" data-status="disponible">
+    <div class="card-img"><img src="trio sp cx3.jpg" alt="Llavero 3 sp carácidos cuadrado" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Cuadrado · Misma familia</p>
+      <p class="card-name">Trío de Carácidos II</p>
+      <p class="card-sci">Hyphessobrycon acaciae · Hemigrammus barrigonae · Knodus breviceps</p>
+      <div class="card-meta">
+        <span class="card-dims">4 × 4 cm</span>
+        <span class="card-price">$ 30.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- 38 -->
+  <div class="card reveal" data-fmt="Llavero rectangular" data-status="disponible">
+    <div class="card-img"><img src="trio sp rx3.jpg" alt="Llavero 3 sp carácidos rectangular" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Rectangular · Misma familia</p>
+      <p class="card-name">Trío de Carácidos III</p>
+      <p class="card-sci">Hyphessobrycon acaciae · Hemigrammus barrigonae · Aphyocharax alburnus</p>
+      <div class="card-meta">
+        <span class="card-dims">6,3 × 3,3 cm</span>
+        <span class="card-price">$ 30.000</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+  <!-- EXTRA: trio sp arena gx3 -->
+  <div class="card reveal" data-fmt="Llavero corazon" data-status="disponible">
+    <div class="card-img"><img src="trio sp arena gx3.jpg" alt="Trío con arena llavero corazón" loading="lazy"/></div>
+    <div class="card-body">
+      <p class="card-fmt">Llavero Corazón · Misma familia</p>
+      <p class="card-name">Trío con Arena</p>
+      <p class="card-sci">Hemigrammus barrigonae · Hyphessobrycon acaciae</p>
+      <div class="card-meta">
+        <span class="card-dims">~4 × 4 cm</span>
+        <span class="card-price">Consultar</span>
+      </div>
+      <p class="card-region">📍 Orinoquía Colombiana</p>
+      <span class="badge av">Disponible</span>
+    </div>
+  </div>
+
+</div><!-- /gallery -->
+
+<!-- ABOUT -->
+<section class="about" id="sobre">
+  <div class="about-text reveal">
+    <h2>Ciencia &amp; Arte<br><em>en perfecta unión</em></h2>
+    <p>Soy ictiólogo e investigador en ciencias naturales con amplio trabajo de campo en los ríos de la Orinoquía Colombiana. Cada pieza nace de años de investigación y de la pasión por preservar la biodiversidad acuática de formas inéditas.</p>
+    <p>Los especímenes son encapsulados en resina epóxica cristalina de alta calidad con técnicas que garantizan transparencia y durabilidad permanentes. Cada diorama es una obra única e irrepetible.</p>
+  </div>
+  <div class="stats reveal">
+    <div class="stat"><div class="stat-n">39</div><div class="stat-l">Piezas únicas</div></div>
+    <div class="stat"><div class="stat-n">∞</div><div class="stat-l">Durabilidad</div></div>
+    <div class="stat"><div class="stat-n">20+</div><div class="stat-l">Especies</div></div>
+    <div class="stat"><div class="stat-n">100%</div><div class="stat-l">Arte científico</div></div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contacto">
+  <h2>Adquiere una<br><em>pieza única</em></h2>
+  <p>Cada obra es única e irrepetible. Escríbenos para consultar disponibilidad,<br>precios y envíos a todo Colombia y el exterior.</p>
+  <div class="btns">
+    <a href="https://wa.me/573153204083" target="_blank" class="btn btn-p">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      WhatsApp
+    </a>
+    <a href="https://instagram.com/migueliforme_col" target="_blank" class="btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+      @migueliforme_col
+    </a>
+  </div>
+  <div class="form-wrap reveal">
+    <div><label>Tu nombre</label><input type="text" placeholder="Nombre completo"/></div>
+    <div><label>Correo electrónico</label><input type="email" placeholder="correo@ejemplo.com"/></div>
+    <div><label>Pieza de interés</label>
+      <select>
+        <option value="">— Selecciona una categoría —</option>
+        <option>Bloque circular · Comunidad de peces</option>
+        <option>Bloque rectangular · Individuo</option>
+        <option>Pisapapel rectangular</option>
+        <option>Pisapapel cuadrado</option>
+        <option>Llavero</option>
+        <option>Pieza especial / Personalizada</option>
+      </select>
+    </div>
+    <div><label>Mensaje</label><textarea placeholder="Cuéntame qué pieza te interesa, si es para regalo, colección personal o institución..."></textarea></div>
+    <div style="display:flex;justify-content:center;margin-top:.5rem">
+      <button class="btn btn-p" onclick="sendWA()">Enviar por WhatsApp</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 Naturaleza Inmortal · Arte Científico en Resina Epóxica · Orinoquía Colombiana</p>
+  <p><a href="https://wa.me/573153204083">+57 315 320 4083</a> &nbsp;·&nbsp; <a href="https://instagram.com/migueliforme_col">@migueliforme_col</a></p>
+</footer>
+
+<!-- LIGHTBOX -->
+<div id="lb">
+  <button id="lb-close" onclick="closeLB()">✕ cerrar</button>
+  <img id="lb-img" src="" alt=""/>
+  <div id="lb-info">
+    <div id="lb-name"></div>
+    <div id="lb-sci"></div>
+    <div id="lb-det"></div>
+  </div>
+</div>
+
+<script>
+  // Cursor
+  const cur = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => { cur.style.left=e.clientX+'px'; cur.style.top=e.clientY+'px'; });
+  document.querySelectorAll('a,button,.card,.filter-btn').forEach(el => {
+    el.addEventListener('mouseenter', () => cur.classList.add('x'));
+    el.addEventListener('mouseleave', () => cur.classList.remove('x'));
+  });
+
+  // Scroll reveal
+  const obs = new IntersectionObserver(entries => entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }), {threshold:.08});
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // Filters
+  const btns = document.querySelectorAll('.filter-btn');
+  const cards = document.querySelectorAll('.card');
+  const countEl = document.getElementById('count');
+
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const f = btn.dataset.filter;
+      let v = 0;
+      cards.forEach(c => {
+        const fmt = (c.dataset.fmt||'').toLowerCase();
+        const status = c.dataset.status||'';
+        let show = false;
+        if(f==='all') show=true;
+        else if(f==='bloque') show=fmt.includes('bloque')||fmt.includes('placa')||fmt.includes('pisapapel');
+        else if(f==='circular') show=fmt.includes('circular')&&!fmt.includes('llavero');
+        else if(f==='pisapapel') show=fmt.includes('pisapapel');
+        else if(f==='llavero') show=fmt.includes('llavero');
+        else if(f==='disponible') show=status==='disponible';
+        c.style.display = show ? '' : 'none';
+        if(show) v++;
+      });
+      countEl.textContent = v;
+    });
+  });
+
+  // Lightbox
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      const img = card.querySelector('img');
+      const name = card.querySelector('.card-name').textContent;
+      const sci = card.querySelector('.card-sci').textContent;
+      const fmt = card.querySelector('.card-fmt').textContent;
+      const dims = card.querySelector('.card-dims').textContent;
+      const price = card.querySelector('.card-price').textContent;
+      document.getElementById('lb-img').src = img.src;
+      document.getElementById('lb-name').textContent = name;
+      document.getElementById('lb-sci').textContent = sci;
+      document.getElementById('lb-det').textContent = fmt+' · '+dims+' · '+price;
+      document.getElementById('lb').classList.add('open');
+    });
+  });
+  function closeLB(){ document.getElementById('lb').classList.remove('open'); }
+  document.getElementById('lb').addEventListener('click', function(e){ if(e.target===this) closeLB(); });
+
+  // WhatsApp form
+  function sendWA(){
+    const n = document.querySelector('.form-wrap input[type=text]').value;
+    const e = document.querySelector('.form-wrap input[type=email]').value;
+    const p = document.querySelector('.form-wrap select').value;
+    const m = document.querySelector('.form-wrap textarea').value;
+    const t = encodeURIComponent('Hola! Me interesa una pieza de *Naturaleza Inmortal*.\n\nNombre: '+n+'\nCorreo: '+e+'\nCategoría: '+p+'\n\nMensaje: '+m);
+    window.open('https://wa.me/573153204083?text='+t,'_blank');
+  }
+</script>
+</body>
+</html>
